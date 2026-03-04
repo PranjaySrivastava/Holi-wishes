@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Happy Holi — A Special Message For You</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Satisfy&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --pink:#FF6BB5; --yellow:#FFD84D; --blue:#5BC8F5;
+  --green:#6EE7A0; --purple:#B97AFF; --orange:#FF9A5C;
+  --bg:#080614; --cream:#FFF8EE;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--cream);overflow-x:hidden;min-height:100vh}
+
+/* CANVASES */
+#particle-canvas,#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:0}
+#confetti-canvas{z-index:10}
+#gulal-canvas{position:fixed;inset:0;z-index:98;pointer-events:none;opacity:0;width:100%;height:100%}
+
+/* REVEAL SCREEN */
+#reveal-screen{
+  position:fixed;inset:0;z-index:100;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:radial-gradient(ellipse at center,#130d2a 0%,#07040f 100%);
+  transition:opacity 1.2s ease,visibility 1.2s ease;
+}
+.reveal-ring{position:absolute;width:260px;height:260px;border-radius:50%;border:1px solid rgba(255,107,181,.25);animation:ringPulse 2.5s ease-in-out infinite}
+.reveal-ring:nth-child(2){width:360px;height:360px;animation-delay:.5s;border-color:rgba(91,200,245,.15)}
+.reveal-ring:nth-child(3){width:460px;height:460px;animation-delay:1s;border-color:rgba(110,231,160,.1)}
+@keyframes ringPulse{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.04);opacity:1}}
+.reveal-icon{font-size:3.5rem;margin-bottom:2rem;animation:iconFloat 3s ease-in-out infinite,fadeInUp 1s .3s ease both;filter:drop-shadow(0 0 24px rgba(255,107,181,.7))}
+@keyframes iconFloat{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-12px) rotate(5deg)}}
+.reveal-tagline{font-family:'Cormorant Garamond',serif;font-size:clamp(1.2rem,4vw,1.9rem);font-weight:300;font-style:italic;color:rgba(255,248,238,.85);letter-spacing:.05em;text-align:center;padding:0 2rem;max-width:560px;animation:fadeInUp 1s .6s ease both;line-height:1.7}
+.reveal-tagline em{font-style:normal;background:linear-gradient(135deg,var(--pink),var(--yellow));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.reveal-dots{display:flex;gap:10px;margin-top:2.5rem;animation:fadeInUp 1s 1s ease both}
+.reveal-dot{width:8px;height:8px;border-radius:50%;animation:dotBounce 1.2s ease-in-out infinite}
+.reveal-dot:nth-child(1){background:var(--pink);animation-delay:0s}
+.reveal-dot:nth-child(2){background:var(--yellow);animation-delay:.2s}
+.reveal-dot:nth-child(3){background:var(--blue);animation-delay:.4s}
+.reveal-dot:nth-child(4){background:var(--green);animation-delay:.6s}
+.reveal-dot:nth-child(5){background:var(--purple);animation-delay:.8s}
+@keyframes dotBounce{0%,100%{transform:scaleY(1)}50%{transform:scaleY(2.2)}}
+
+/* BG + BLOBS */
+.bg-layer{
+  position:fixed;inset:0;z-index:-1;
+  background:
+    radial-gradient(ellipse 70% 60% at 15% 10%,rgba(255,107,181,.22) 0%,transparent 55%),
+    radial-gradient(ellipse 50% 45% at 88% 5%,rgba(91,200,245,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 45% 50% at 80% 90%,rgba(110,231,160,.18) 0%,transparent 55%),
+    radial-gradient(ellipse 60% 45% at 5% 85%,rgba(255,216,77,.15) 0%,transparent 55%),
+    radial-gradient(ellipse 35% 35% at 50% 50%,rgba(185,122,255,.12) 0%,transparent 55%),
+    linear-gradient(160deg,#080614 0%,#0d0a22 50%,#080614 100%);
+  animation:bgShimmer 10s ease-in-out infinite alternate;
+}
+@keyframes bgShimmer{0%{filter:hue-rotate(0deg) brightness(1)}100%{filter:hue-rotate(20deg) brightness(1.08)}}
+.blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:0;pointer-events:none;animation:blobDrift 8s ease-in-out infinite alternate;transition:opacity 2s ease}
+.blob.visible{opacity:.3}
+.blob1{width:350px;height:350px;background:var(--pink);top:-8%;left:5%;animation-delay:0s}
+.blob2{width:280px;height:280px;background:var(--blue);top:20%;right:2%;animation-delay:1.5s}
+.blob3{width:300px;height:300px;background:var(--green);bottom:10%;left:2%;animation-delay:.8s}
+.blob4{width:320px;height:320px;background:var(--yellow);bottom:5%;right:8%;animation-delay:2s}
+.blob5{width:220px;height:220px;background:var(--purple);top:45%;left:40%;animation-delay:1.2s}
+@keyframes blobDrift{0%{transform:translate(0,0) scale(1)}100%{transform:translate(40px,30px) scale(1.12)}}
+
+/* MAIN SCREEN */
+#main-screen{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5rem 1.5rem 8rem;opacity:0;transition:opacity 1.5s ease}
+.top-ornament{font-size:2rem;opacity:0;margin-bottom:1rem;filter:drop-shadow(0 0 14px rgba(255,216,77,.6))}
+
+/* CARD */
+.celebration-card{max-width:720px;width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);border-radius:28px;padding:clamp(2rem,6vw,4rem) clamp(1.5rem,5vw,3.5rem);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 0 0 1px rgba(255,255,255,.05),0 40px 80px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.12);position:relative;overflow:hidden;opacity:0}
+.celebration-card::before{content:'';position:absolute;inset:0;border-radius:28px;padding:1px;background:linear-gradient(135deg,rgba(255,107,181,.4),rgba(91,200,245,.2),rgba(110,231,160,.3),rgba(255,216,77,.4),rgba(185,122,255,.3));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;animation:borderGlow 4s linear infinite}
+@keyframes borderGlow{0%,100%{opacity:.6}50%{opacity:1}}
+.card-dot{position:absolute;width:6px;height:6px;border-radius:50%}
+.card-dot.tl{top:16px;left:16px;background:var(--pink);box-shadow:0 0 8px var(--pink)}
+.card-dot.tr{top:16px;right:16px;background:var(--yellow);box-shadow:0 0 8px var(--yellow)}
+.card-dot.bl{bottom:16px;left:16px;background:var(--green);box-shadow:0 0 8px var(--green)}
+.card-dot.br{bottom:16px;right:16px;background:var(--blue);box-shadow:0 0 8px var(--blue)}
+
+/* HEADING */
+.holi-heading{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,10vw,6rem);font-weight:700;line-height:1;text-align:center;margin-bottom:.3rem;background:linear-gradient(135deg,var(--pink) 0%,var(--yellow) 30%,var(--blue) 60%,var(--green) 80%,var(--purple) 100%);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;animation:gradientFlow 5s ease infinite;filter:drop-shadow(0 0 30px rgba(255,107,181,.4));opacity:0}
+@keyframes gradientFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.divider{display:flex;align-items:center;gap:1rem;margin:1.2rem 0;opacity:0}
+.divider-line{flex:1;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)}
+.divider-icon{font-size:1.2rem}
+.quote-label{text-align:center;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,248,238,.35);margin-bottom:1rem;opacity:0}
+.message-body{text-align:center;line-height:1.85;min-height:180px}
+.msg-line{display:block;font-family:'Cormorant Garamond',serif;font-size:clamp(1rem,2.8vw,1.22rem);font-weight:300;color:rgba(255,248,238,.88);opacity:0;transform:translateY(22px);letter-spacing:.02em;margin-bottom:.2rem}
+.msg-line.accent{font-style:italic;color:var(--yellow);font-size:clamp(1.05rem,3vw,1.28rem)}
+.msg-line strong{font-weight:600;background:linear-gradient(135deg,var(--pink),var(--orange));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.msg-line.shayari{font-style:italic;background:linear-gradient(135deg,var(--purple),var(--blue));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.signature-wrap{margin-top:2.5rem;text-align:center;opacity:0}
+.signature-label{font-size:.75rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,248,238,.35);margin-bottom:.4rem}
+.signature{font-family:'Satisfy',cursive;font-size:clamp(1.6rem,4vw,2.2rem);background:linear-gradient(135deg,var(--pink),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 16px rgba(185,122,255,.5))}
+
+/* No music panel — music plays silently in background */
+
+/* ANIMATIONS */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideReveal{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+
+/* GRAIN */
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:500;opacity:.3;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E")}
+
+@media(max-width:600px){
+  .celebration-card{border-radius:20px}
+  .blob1,.blob2,.blob3,.blob4{width:180px;height:180px;filter:blur(55px)}
+}
+</style>
+</head>
+<body>
+
+<canvas id="particle-canvas"></canvas>
+<canvas id="confetti-canvas"></canvas>
+<canvas id="gulal-canvas"></canvas>
+
+<!-- REVEAL SCREEN -->
+<div id="reveal-screen">
+  <div class="reveal-ring"></div>
+  <div class="reveal-ring"></div>
+  <div class="reveal-ring"></div>
+  <div class="reveal-icon">🎨</div>
+  <p class="reveal-tagline">A <em>Special Holi Celebration</em><br/>Message For You…</p>
+  <div class="reveal-dots">
+    <div class="reveal-dot"></div><div class="reveal-dot"></div>
+    <div class="reveal-dot"></div><div class="reveal-dot"></div>
+    <div class="reveal-dot"></div>
+  </div>
+</div>
+
+<div class="bg-layer"></div>
+<div class="blob blob1"></div><div class="blob blob2"></div>
+<div class="blob blob3"></div><div class="blob blob4"></div>
+<div class="blob blob5"></div>
+
+<!-- MAIN SCREEN -->
+<div id="main-screen">
+  <div class="top-ornament" id="top-ornament">🪔✨🌸</div>
+  <div class="celebration-card" id="card">
+    <div class="card-dot tl"></div><div class="card-dot tr"></div>
+    <div class="card-dot bl"></div><div class="card-dot br"></div>
+    <h1 class="holi-heading" id="main-heading">Happy Holi!</h1>
+    <div class="divider" id="divider">
+      <div class="divider-line"></div><span class="divider-icon">🌈</span><div class="divider-line"></div>
+    </div>
+    <p class="quote-label" id="quote-label">✦ Today's Holi Poem ✦</p>
+    <div class="message-body" id="message-body"></div>
+    <div class="signature-wrap" id="signature-wrap">
+      <p class="signature-label">With Celebration</p>
+      <div class="signature">— Pranjay 🌸</div>
+    </div>
+  </div>
+</div>
+
+<!-- No music panel UI — Rang Barse plays silently in background -->
+
+<script>
+/* ====================================================
+   20 RANDOM HOLI MESSAGES
+   ==================================================== */
+const MESSAGES = [
+  {label:'✦ Today\'s Holi Poem ✦',lines:[
+    {t:'This Holi, I wish your life bursts into colors',a:false},
+    {t:'brighter than the sky at sunrise.',a:true},
+    {t:'May every splash of <strong>gulal</strong> bring you',a:false},
+    {t:'unstoppable happiness.',a:true},
+    {t:'May every shade paint your dreams',a:false},
+    {t:'with success and endless wonder.',a:true},
+    {t:'May this festival fill your world with',a:false},
+    {t:'celebration, positivity, and eternal smiles.',a:true},
+  ]},
+  {label:'✦ A Poem For You ✦',lines:[
+    {t:'Colors are just the language Holi speaks —',a:false},
+    {t:'but love is what it truly means.',a:true},
+    {t:'May your canvas of life be splashed',a:false},
+    {t:'with joy in every hue.',a:true},
+    {t:'May the <strong>pichkari</strong> of fortune drench you',a:false},
+    {t:'in blessings, old and new.',a:true},
+    {t:'Happy Holi — from the deepest corner',a:false},
+    {t:'of a heart that truly adores you.',a:true},
+  ]},
+  {label:'✦ Colors of the Heart ✦',lines:[
+    {t:'If I could paint the sky for you today,',a:false},
+    {t:"I'd use every shade that joy contains.",a:true},
+    {t:'Pink for laughter, yellow for warmth,',a:false},
+    {t:"blue for peace in life's quiet rains.",a:true},
+    {t:'Green for the hope that never fades,',a:false},
+    {t:'purple for dreams that dare to grow.',a:true},
+    {t:'This Holi, may your world be painted',a:false},
+    {t:'with every color your heart will ever know.',a:true},
+  ]},
+  {label:'✦ A Gentle Wish ✦',lines:[
+    {t:'Like gulal rising in the morning wind —',a:false},
+    {t:'soft, vivid, free, impossibly beautiful —',a:true},
+    {t:'may your days rise just as brilliantly.',a:false},
+    {t:'May sorrow dissolve like old colors in rain,',a:true},
+    {t:'and in their place bloom celebrations',a:false},
+    {t:'that feel like coming home again.',a:true},
+    {t:'Wishing you a Holi',a:false},
+    {t:'as radiant as you are.',a:true},
+  ]},
+  {label:'✦ Festival of the Soul ✦',lines:[
+    {t:'Some festivals are for the eyes —',a:false},
+    {t:'but Holi was always for the soul.',a:true},
+    {t:'For letting go of all that weighs you,',a:false},
+    {t:'for becoming joyfully whole.',a:true},
+    {t:'May this Holi burn away every fear,',a:false},
+    {t:'every doubt that dims your light.',a:true},
+    {t:'And leave you drenched in the kind of color',a:false},
+    {t:'that glows even through the night.',a:true},
+  ]},
+  {label:'✦ Holi Shayari ✦',lines:[
+    {t:'रंगों की बौछार हो,',s:true},
+    {t:'खुशियों की बहार हो,',s:true},
+    {t:'हर पल सुनहरा हो तुम्हारा,',s:true},
+    {t:'ऐसी Holi हो इस बार।',s:true},
+    {t:'— May every color that touches you',a:true},
+    {t:'carry a wish that comes true.',a:true},
+  ]},
+  {label:'✦ Rang Bhari Shayari ✦',lines:[
+    {t:'गुलाल की खुशबू में,',s:true},
+    {t:'बसंत का संदेशा है —',s:true},
+    {t:'हर रंग कह रहा है:',s:true},
+    {t:'"तुम्हारी मुस्कान जीवन का जश्न है।"',s:true},
+    {t:'— Smile today, for your smile',a:true},
+    {t:'is the most colorful thing in the world.',a:true},
+  ]},
+  {label:'✦ Dil Se Shayari ✦',lines:[
+    {t:'होली है, तो रंग जाओ —',s:true},
+    {t:'हर गम को भुलाकर मुस्कुराओ।',s:true},
+    {t:'ये पल न लौटेगा दोबारा,',s:true},
+    {t:'जी भर के इसे तुम मनाओ।',s:true},
+    {t:'— This moment is a gift.',a:true},
+    {t:'Celebrate it with your whole heart.',a:false},
+  ]},
+  {label:'✦ A Thoughtful Wish ✦',lines:[
+    {t:'Holi teaches us something profound —',a:false},
+    {t:'that life is most beautiful when shared.',a:true},
+    {t:'May you always have someone',a:false},
+    {t:'to throw color with,',a:false},
+    {t:'to laugh loudly beside,',a:false},
+    {t:'and to celebrate the ordinary magic',a:false},
+    {t:'of simply being alive.',a:true},
+  ]},
+  {label:'✦ The Wisdom of Colors ✦',lines:[
+    {t:'Every color in Holi carries a truth:',a:false},
+    {t:'<strong>Red</strong> — for the courage to love deeply.',a:false},
+    {t:'<strong>Yellow</strong> — for the warmth you radiate daily.',a:false},
+    {t:'<strong>Blue</strong> — for the calm you bring to storms.',a:false},
+    {t:'<strong>Green</strong> — for the growth you choose each day.',a:false},
+    {t:'May all these colors live permanently',a:false},
+    {t:'in the story of your life.',a:true},
+  ]},
+  {label:'✦ Light & Color ✦',lines:[
+    {t:'Colors exist because light bends and breaks —',a:false},
+    {t:'and so does a beautiful life.',a:true},
+    {t:'May you bend gracefully through challenges,',a:false},
+    {t:'break free from all that limits you,',a:false},
+    {t:'and emerge as the full spectrum',a:false},
+    {t:'of everything you were always meant to be.',a:true},
+    {t:'Happy Holi — shine on.',a:false},
+  ]},
+  {label:'✦ A Playful Holi Wish ✦',lines:[
+    {t:'Warning: This Holi wish',a:false},
+    {t:'may contain traces of pure joy.',a:true},
+    {t:'Side effects include uncontrollable smiling,',a:false},
+    {t:'spontaneous dancing,',a:true},
+    {t:'and the overwhelming urge',a:false},
+    {t:'to throw color at strangers.',a:true},
+    {t:'Consult your heart before reading.',a:false},
+    {t:'Happy Holi! 🎨',a:false},
+  ]},
+  {label:'✦ The Holi Disclaimer ✦',lines:[
+    {t:'I would have called, but honestly —',a:false},
+    {t:'a Holi wish this colorful',a:false},
+    {t:'deserves more than just words.',a:true},
+    {t:'It deserves a whole cinematic experience,',a:false},
+    {t:'floating particles, glowing text,',a:false},
+    {t:'and possibly confetti.',a:true},
+    {t:'So here we are. Happy Holi!',a:false},
+    {t:"You're very welcome. 😄",a:true},
+  ]},
+  {label:'✦ Officially Holi-Certified ✦',lines:[
+    {t:'This message has been officially tested',a:false},
+    {t:'to contain 100% certified joy,',a:true},
+    {t:'0% sadness,',a:false},
+    {t:'and an astronomically high level',a:false},
+    {t:'of festive energy.',a:true},
+    {t:'Please store in your heart.',a:false},
+    {t:'Best before: Never. Happy Holi! 🌈',a:true},
+  ]},
+  {label:'✦ A Short & Sweet Wish ✦',lines:[
+    {t:"May this Holi bring you",a:false},
+    {t:'the kind of happiness',a:false},
+    {t:"that doesn't wash off",a:true},
+    {t:'even after the colors do.',a:false},
+    {t:'Happy Holi.',a:true},
+    {t:'With all the colors of my heart.',a:false},
+  ]},
+  {label:'✦ Brief & Beautiful ✦',lines:[
+    {t:'Holi is just one day.',a:false},
+    {t:'But I hope the joy it gives you',a:false},
+    {t:'lasts three hundred and sixty-five.',a:true},
+    {t:'Happy Holi, lovely person.',a:false},
+    {t:'Stay colorful, always.',a:true},
+  ]},
+  {label:'✦ The Simplest Truth ✦',lines:[
+    {t:'In a world full of noise,',a:false},
+    {t:'Holi is a reminder:',a:false},
+    {t:'Sometimes joy is just',a:false},
+    {t:'color, laughter, and someone you love.',a:true},
+    {t:'May you always have all three.',a:false},
+    {t:'Happy Holi. 💛',a:true},
+  ]},
+  {label:'✦ Colors & Wishes ✦',lines:[
+    {t:'Pink for warmth.',a:false},
+    {t:'Yellow for light.',a:false},
+    {t:'Blue for calm.',a:false},
+    {t:'Green for hope.',a:false},
+    {t:'Purple for magic.',a:true},
+    {t:'All of it — for you.',a:false},
+    {t:'Happy Holi. 🎨',a:true},
+  ]},
+  {label:'✦ One Line at a Time ✦',lines:[
+    {t:'May every dawn this year',a:false},
+    {t:'feel like Holi morning —',a:true},
+    {t:'full of possibility,',a:false},
+    {t:'alive with color,',a:false},
+    {t:'and beginning',a:false},
+    {t:'with joy.',a:true},
+  ]},
+  {label:'✦ The Prayer of Colors ✦',lines:[
+    {t:'Dear Universe, this Holi,',a:false},
+    {t:'bless this person with pink mornings,',a:true},
+    {t:'golden afternoons,',a:false},
+    {t:'and indigo evenings full of peace.',a:true},
+    {t:'Wrap every one of their days',a:false},
+    {t:'in the colors of a festival.',a:false},
+    {t:'They deserve nothing less.',a:true},
+  ]},
+];
+
+/* ====================================================
+   WEB AUDIO MUSIC ENGINE
+   5 distinct Holi-flavored compositions
+   Each has a unique melody, rhythm, and mood
+   ==================================================== */
+
+/* ====================================================
+   RANG BARSE — the one and only background song.
+   Synthesized via Web Audio API. Loops forever.
+   Inspired by the iconic Holi classic by Amitabh Bachchan.
+   ==================================================== */
+const RANG_BARSE = {
+  name: 'रंग बरसे — Rang Barse',
+  melody: [
+    [523,0.3,'sine'],[659,0.3,'sine'],[784,0.3,'sine'],[880,0.6,'sine'],
+    [784,0.3,'sine'],[659,0.3,'sine'],[523,0.3,'sine'],[392,0.6,'sine'],
+    [523,0.3,'sine'],[659,0.3,'sine'],[784,0.3,'sine'],[1047,0.4,'sine'],
+    [880,0.2,'sine'],[784,0.2,'sine'],[659,0.2,'sine'],[523,0.8,'sine'],
+    [392,0.3,'sine'],[440,0.3,'sine'],[523,0.3,'sine'],[659,0.6,'sine'],
+    [784,0.3,'sine'],[659,0.3,'sine'],[523,0.3,'sine'],[440,0.6,'sine'],
+    [392,0.2,'sine'],[440,0.2,'sine'],[523,0.2,'sine'],[659,0.2,'sine'],[784,0.8,'sine'],
+    [659,0.3,'sine'],[523,0.3,'sine'],[440,0.3,'sine'],[392,1.0,'sine'],
+  ],
+  tempo: 0.35,
+  bass: 130.81,
+  drone: 130.81,
+};
+
+/* ====================================================
+   MUSIC ENGINE STATE
+   ==================================================== */
+let AC = null;
+let masterGain = null;
+let isPlaying = false;
+let songLoopTimeout = null;
+
+/* Create AudioContext once */
+function getAC() {
+  if (!AC) {
+    AC = new (window.AudioContext || window.webkitAudioContext)();
+    masterGain = AC.createGain();
+    masterGain.gain.value = 0.45;
+    masterGain.connect(AC.destination);
+  }
+  if (AC.state === 'suspended') AC.resume();
+  return AC;
+}
+
+/* Play a single melody note */
+function playNote(ac, dest, freq, start, dur, type, vol=0.18) {
+  if (freq <= 0) return;
+  const osc  = ac.createOscillator();
+  const gain = ac.createGain();
+  const delay = ac.createDelay(0.08);
+  const dGain = ac.createGain();
+  delay.delayTime.value = 0.05;
+  dGain.gain.value = 0.15;
+  osc.type = type;
+  osc.frequency.value = freq;
+  osc.detune.value = (Math.random() - 0.5) * 8;
+  gain.gain.setValueAtTime(0, start);
+  gain.gain.linearRampToValueAtTime(vol, start + 0.02);
+  gain.gain.setValueAtTime(vol, start + dur * 0.7);
+  gain.gain.linearRampToValueAtTime(0, start + dur);
+  osc.connect(gain);
+  gain.connect(dest);
+  gain.connect(delay); delay.connect(dGain); dGain.connect(dest);
+  osc.start(start); osc.stop(start + dur + 0.05);
+}
+
+/* Dhol / tabla percussion hit */
+function playDhol(ac, dest, time, variant=0) {
+  const buf  = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.18), ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    const t = i / ac.sampleRate;
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-t * 28)
+            + Math.sin(2 * Math.PI * (variant === 0 ? 90 : 140) * t) * Math.exp(-t * 18) * 0.7;
+  }
+  const src  = ac.createBufferSource();
+  const gain = ac.createGain();
+  const filt = ac.createBiquadFilter();
+  filt.type = 'bandpass';
+  filt.frequency.value = variant === 0 ? 120 : 200;
+  filt.Q.value = 1.5;
+  src.buffer = buf; gain.gain.value = 0.55;
+  src.connect(filt); filt.connect(gain); gain.connect(dest);
+  src.start(time);
+}
+
+/* High shaker accent */
+function playShaker(ac, dest, time) {
+  const buf  = ac.createBuffer(1, Math.floor(ac.sampleRate * 0.06), ac.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < data.length; i++) {
+    data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (ac.sampleRate * 0.015));
+  }
+  const src  = ac.createBufferSource();
+  const filt = ac.createBiquadFilter();
+  const gain = ac.createGain();
+  filt.type = 'highpass'; filt.frequency.value = 6000;
+  gain.gain.value = 0.15;
+  src.buffer = buf;
+  src.connect(filt); filt.connect(gain); gain.connect(dest);
+  src.start(time);
+}
+
+/* Tanpura drone */
+function playDrone(ac, dest, freq, dur) {
+  const osc  = ac.createOscillator();
+  const osc2 = ac.createOscillator();
+  const gain = ac.createGain();
+  const filt = ac.createBiquadFilter();
+  filt.type = 'lowpass'; filt.frequency.value = 400;
+  osc.type = 'sine'; osc.frequency.value = freq;
+  osc2.type = 'sine'; osc2.frequency.value = freq * 2.01;
+  const now = ac.currentTime;
+  gain.gain.setValueAtTime(0, now);
+  gain.gain.linearRampToValueAtTime(0.12, now + 1.5);
+  gain.gain.setValueAtTime(0.12, now + dur - 1.5);
+  gain.gain.linearRampToValueAtTime(0, now + dur);
+  osc.connect(filt); osc2.connect(filt); filt.connect(gain); gain.connect(dest);
+  osc.start(now); osc2.start(now); osc.stop(now + dur); osc2.stop(now + dur);
+}
+
+/* Play one full loop of Rang Barse and schedule next */
+function playRangBarse() {
+  const ac  = getAC();
+  const song = RANG_BARSE;
+  const now  = ac.currentTime + 0.05;
+  const totalDur = song.melody.reduce((s, n) => s + n[1], 0);
+  const loopDur  = totalDur + 0.5;
+
+  /* Drone */
+  playDrone(ac, masterGain, song.drone, loopDur);
+
+  /* Melody */
+  let t = now;
+  song.melody.forEach(([freq, dur, type]) => {
+    playNote(ac, masterGain, freq, t, dur, type);
+    t += dur;
+  });
+
+  /* Dhol rhythm */
+  const numBeats = Math.floor(loopDur / song.tempo);
+  for (let b = 0; b < numBeats; b++) {
+    const bt = now + b * song.tempo;
+    if (b % 2 === 0) playDhol(ac, masterGain, bt, 0);
+    if (b % 4 === 2) playDhol(ac, masterGain, bt + song.tempo * 0.5, 1);
+    playShaker(ac, masterGain, bt);
+    if (b % 2 === 1) playShaker(ac, masterGain, bt + song.tempo * 0.5);
+  }
+
+  /* Bass pulses */
+  for (let b = 0; b < numBeats; b += 4) {
+    playNote(ac, masterGain, song.bass, now + b * song.tempo, song.tempo * 1.8, 'triangle', 0.22);
+  }
+
+  /* Loop seamlessly */
+  clearTimeout(songLoopTimeout);
+  songLoopTimeout = setTimeout(() => {
+    if (isPlaying) playRangBarse();
+  }, (loopDur - 0.15) * 1000);
+}
+
+/* ====================================================
+   AUTO-START — fires on very first user interaction.
+   Browsers block AudioContext until a user gesture.
+   After that, Rang Barse plays silently on loop forever.
+   ==================================================== */
+let autoStarted = false;
+function autoStart() {
+  if (autoStarted) return;
+  autoStarted = true;
+  ['click','touchstart','keydown'].forEach(evt =>
+    document.removeEventListener(evt, autoStart, { capture: true })
+  );
+  isPlaying = true;
+  playRangBarse();
+}
+['click','touchstart','keydown'].forEach(evt =>
+  document.addEventListener(evt, autoStart, { capture: true })
+);
+
+/* ====================================================
+   CANVAS SETUP
+   ==================================================== */
+const COLORS = ['#FF6BB5','#FFD84D','#5BC8F5','#6EE7A0','#B97AFF','#FF9A5C'];
+const pCanvas = document.getElementById('particle-canvas');
+const cCanvas = document.getElementById('confetti-canvas');
+const gulalCanvas = document.getElementById('gulal-canvas');
+const pCtx = pCanvas.getContext('2d');
+const cCtx = cCanvas.getContext('2d');
+const gCtx = gulalCanvas.getContext('2d');
+function resize() {
+  [pCanvas,cCanvas,gulalCanvas].forEach(c=>{ c.width=innerWidth; c.height=innerHeight; });
+}
+resize(); window.addEventListener('resize', resize);
+
+/* ====================================================
+   AMBIENT PARTICLES
+   ==================================================== */
+let particles=[];
+function mkP(){ return {x:Math.random()*pCanvas.width,y:pCanvas.height+20,size:Math.random()*5+2,color:COLORS[~~(Math.random()*COLORS.length)],sy:-(Math.random()*.8+.3),sx:(Math.random()-.5)*.5,a:Math.random()*.6+.2}; }
+for(let i=0;i<60;i++){const p=mkP();p.y=Math.random()*pCanvas.height;particles.push(p);}
+function animP(){
+  pCtx.clearRect(0,0,pCanvas.width,pCanvas.height);
+  if(Math.random()<.4)particles.push(mkP());
+  particles=particles.filter(p=>p.y>-20);
+  particles.forEach(p=>{
+    p.x+=p.sx;p.y+=p.sy;
+    pCtx.globalAlpha=p.a;pCtx.fillStyle=p.color;
+    pCtx.beginPath();pCtx.arc(p.x,p.y,p.size,0,Math.PI*2);pCtx.fill();
+    pCtx.fillRect(p.x-p.size*1.5,p.y,p.size*3,.8);
+    pCtx.fillRect(p.x,p.y-p.size*1.5,.8,p.size*3);
+  });
+  pCtx.globalAlpha=1; requestAnimationFrame(animP);
+}
+animP();
+
+/* ====================================================
+   GULAL TRANSITION
+   ==================================================== */
+let gulalDrops=[],gulalDone=false;
+function launchGulal(){
+  const w=gulalCanvas.width,h=gulalCanvas.height,cx=w/2,cy=h/2;
+  gulalDrops=[];
+  for(let i=0;i<320;i++){
+    const ang=Math.random()*Math.PI*2,spd=Math.random()*28+6;
+    gulalDrops.push({x:cx,y:cy,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,size:Math.random()*22+6,color:COLORS[~~(Math.random()*COLORS.length)],alpha:1,grow:Math.random()*3+1});
+  }
+  for(let i=0;i<80;i++){
+    const side=~~(Math.random()*4);let x,y,vx,vy;
+    if(side===0){x=0;y=Math.random()*h;vx=Math.random()*20+10;vy=(Math.random()-.5)*15;}
+    else if(side===1){x=w;y=Math.random()*h;vx=-(Math.random()*20+10);vy=(Math.random()-.5)*15;}
+    else if(side===2){x=Math.random()*w;y=0;vx=(Math.random()-.5)*15;vy=Math.random()*20+10;}
+    else{x=Math.random()*w;y=h;vx=(Math.random()-.5)*15;vy=-(Math.random()*20+10);}
+    gulalDrops.push({x,y,vx,vy,size:Math.random()*18+4,color:COLORS[~~(Math.random()*COLORS.length)],alpha:.9,grow:1});
+  }
+  gulalCanvas.style.opacity='1'; gulalDone=false; requestAnimationFrame(drawGulal);
+}
+function drawGulal(){
+  if(gulalDone)return;
+  gCtx.clearRect(0,0,gulalCanvas.width,gulalCanvas.height);
+  let allFaded=true;
+  gulalDrops.forEach(d=>{
+    if(d.alpha<=0)return; allFaded=false;
+    const g=gCtx.createRadialGradient(d.x,d.y,0,d.x,d.y,d.size);
+    g.addColorStop(0,d.color);g.addColorStop(1,'transparent');
+    gCtx.globalAlpha=d.alpha;gCtx.fillStyle=g;
+    gCtx.beginPath();gCtx.arc(d.x,d.y,d.size,0,Math.PI*2);gCtx.fill();
+    d.x+=d.vx;d.y+=d.vy;d.vx*=.94;d.vy*=.94;d.size+=d.grow;d.alpha-=.018;d.grow*=.97;
+  });
+  gCtx.globalAlpha=1;
+  if(allFaded){gulalDone=true;gulalCanvas.style.opacity='0';gulalCanvas.style.transition='opacity .8s ease';}
+  else requestAnimationFrame(drawGulal);
+}
+
+/* ====================================================
+   CONFETTI
+   ==================================================== */
+let cfPcs=[],cfRunning=false;
+function spawnConfetti(){
+  cfRunning=true;
+  for(let i=0;i<220;i++){
+    cfPcs.push({x:Math.random()*cCanvas.width,y:-20-Math.random()*200,w:Math.random()*10+5,h:Math.random()*6+3,color:COLORS[~~(Math.random()*COLORS.length)],sy:Math.random()*3+1.5,sx:(Math.random()-.5)*2,rot:Math.random()*360,rs:(Math.random()-.5)*5,alpha:1,shape:Math.random()>.5?'r':'c'});
+  }
+  animC(); setTimeout(()=>{cfRunning=false;},5000);
+}
+function animC(){
+  cCtx.clearRect(0,0,cCanvas.width,cCanvas.height);
+  cfPcs=cfPcs.filter(p=>p.y<cCanvas.height+30&&p.alpha>0);
+  cfPcs.forEach(p=>{
+    cCtx.save();cCtx.globalAlpha=p.alpha;cCtx.fillStyle=p.color;
+    cCtx.translate(p.x,p.y);cCtx.rotate(p.rot*Math.PI/180);
+    p.shape==='r'?cCtx.fillRect(-p.w/2,-p.h/2,p.w,p.h):(cCtx.beginPath(),cCtx.arc(0,0,p.w/2,0,Math.PI*2),cCtx.fill());
+    cCtx.restore();
+    p.x+=p.sx;p.y+=p.sy;p.rot+=p.rs;p.sx+=(Math.random()-.5)*.1;
+    if(p.y>cCanvas.height-150)p.alpha-=.02;
+  });
+  if(cfPcs.length>0||cfRunning)requestAnimationFrame(animC);
+  else cCtx.clearRect(0,0,cCanvas.width,cCanvas.height);
+}
+
+/* ====================================================
+   RANDOM MESSAGE LOADER
+   ==================================================== */
+let lastMsgIdx=-1;
+function loadRandomMessage(){
+  let idx; do{idx=~~(Math.random()*MESSAGES.length);}while(MESSAGES.length>1&&idx===lastMsgIdx);
+  lastMsgIdx=idx;
+  const msg=MESSAGES[idx];
+  document.getElementById('quote-label').textContent=msg.label;
+  const body=document.getElementById('message-body');
+  body.innerHTML='';
+  msg.lines.forEach((l,i)=>{
+    const span=document.createElement('span');
+    span.className='msg-line'+(l.a?' accent':'')+(l.s?' shayari':'');
+    span.id='ml'+i; span.innerHTML=l.t;
+    body.appendChild(span);
+  });
+}
+
+/* ====================================================
+   LINE REVEAL
+   ==================================================== */
+function revealLines(){
+  const lines=document.querySelectorAll('.msg-line');
+  lines.forEach((el,i)=>{ setTimeout(()=>{ el.style.animation='slideReveal 0.8s ease forwards'; },i*200); });
+  setTimeout(()=>{
+    document.getElementById('signature-wrap').style.animation='fadeInUp 1s ease forwards';
+    setTimeout(()=>{ spawnConfetti(); },600);
+  },lines.length*200+600);
+}
+
+/* ====================================================
+   MAIN SCREEN SEQUENCE
+   ==================================================== */
+function startMainScreen(){
+  loadRandomMessage();
+  document.getElementById('main-screen').style.opacity='1';
+  document.querySelectorAll('.blob').forEach((b,i)=>setTimeout(()=>b.classList.add('visible'),i*200));
+  const card=document.getElementById('card');
+  setTimeout(()=>{
+    card.style.animation='fadeInUp 1.2s ease forwards';
+    document.getElementById('top-ornament').style.animation='fadeInUp 1s .3s ease forwards';
+    document.getElementById('main-heading').style.animation='fadeInUp 1s .5s ease forwards';
+    document.getElementById('divider').style.animation='fadeIn 1s .8s ease forwards';
+    document.getElementById('quote-label').style.animation='fadeIn 1s 1s ease forwards';
+  },200);
+  setTimeout(revealLines,1400);
+}
+
+/* ====================================================
+   MASTER BOOT
+   ==================================================== */
+window.addEventListener('DOMContentLoaded',()=>{
+  const rs=document.getElementById('reveal-screen');
+  setTimeout(()=>{
+    launchGulal();
+    rs.style.opacity='0'; rs.style.visibility='hidden'; rs.style.pointerEvents='none';
+    setTimeout(startMainScreen,600);
+  },2700);
+});
+
+/* ====================================================
+   CLICK SPLASH
+   ==================================================== */
+document.addEventListener('click',(e)=>{
+  const drops=[];
+  for(let i=0;i<25;i++){
+    const ang=Math.random()*Math.PI*2,spd=Math.random()*12+3;
+    drops.push({x:e.clientX,y:e.clientY,vx:Math.cos(ang)*spd,vy:Math.sin(ang)*spd,size:Math.random()*12+4,alpha:1,color:COLORS[~~(Math.random()*COLORS.length)]});
+  }
+  const tmp=document.createElement('canvas');
+  tmp.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:300;';
+  tmp.width=innerWidth;tmp.height=innerHeight;document.body.appendChild(tmp);
+  const ctx=tmp.getContext('2d');
+  (function draw(){
+    ctx.clearRect(0,0,tmp.width,tmp.height);let alive=false;
+    drops.forEach(d=>{
+      if(d.alpha<=0)return;alive=true;
+      const g=ctx.createRadialGradient(d.x,d.y,0,d.x,d.y,d.size);
+      g.addColorStop(0,d.color);g.addColorStop(1,'transparent');
+      ctx.globalAlpha=d.alpha;ctx.fillStyle=g;
+      ctx.beginPath();ctx.arc(d.x,d.y,d.size,0,Math.PI*2);ctx.fill();
+      d.x+=d.vx;d.y+=d.vy;d.vx*=.9;d.vy*=.9;d.size+=.5;d.alpha-=.04;
+    });
+    ctx.globalAlpha=1;
+    if(alive)requestAnimationFrame(draw);else tmp.remove();
+  })();
+});
+</script>
+</body>
+</html>
